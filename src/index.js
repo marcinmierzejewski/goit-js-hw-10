@@ -1,4 +1,5 @@
 import './css/styles.css';
+import { fetchCountries } from './fetchCountries';
 
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import 'notiflix/dist/notiflix-3.2.5.min.css';
@@ -6,7 +7,6 @@ import 'notiflix/dist/notiflix-3.2.5.min.css';
 const _ = require('lodash');
 
 const DEBOUNCE_DELAY = 300;
-let filterFields = 'name,capital,population,flags,languages';
 
 const notifyOptions = {
   opacity: 0.9,
@@ -24,31 +24,17 @@ fetchCountryName.addEventListener(
         console.log(countries);
         renderCountriesList(countries);
       })
-      .then(console.log('sprawdzamy'))
+      .then(console.log('Checking...'))
       .catch(error => {
-        if(e.target.value.trim() !== ""){
+        if (e.target.value.trim() !== '') {
           noFoundMatch(error);
+        } else {
+          Notify.info('Enter country name');
+          clearResult();
         }
-        countryList.innerHTML = '';
-        countryInfo.innerHTML = '';        
       });
   }, DEBOUNCE_DELAY)
 );
-
-function fetchCountries(name) {
-  const params = new URLSearchParams({
-    fields: filterFields,
-  });
-
-  return fetch(`https://restcountries.com/v3.1/name/${name}?${params}`).then(
-    response => {
-      if (!response.ok) {
-        throw new Error(response.status);
-      }
-      return response.json();
-    }
-  );
-}
 
 function renderCountriesList(countries) {
   let matchFound = countries.length;
@@ -69,18 +55,18 @@ function renderCountriesList(countries) {
 function noFoundMatch(error) {
   console.log(error);
   Notify.failure('Oops, there is no country with that name', notifyOptions);
-  countryList.innerHTML = '';
-  countryInfo.innerHTML = '';
+  clearResult();
+  return;
 }
 
 function toMuchFound() {
   Notify.info('Too many matches found. Please enter a more specific name.');
-  countryList.innerHTML = '';
-  countryInfo.innerHTML = '';
+  clearResult();
   return;
 }
 
 function muchFoundTo10(countries) {
+  clearResult();
   const markupList = countries
     .map(({ name, flags }) => {
       return `<li>
@@ -90,10 +76,10 @@ function muchFoundTo10(countries) {
     })
     .join('');
   countryList.innerHTML = markupList;
-  countryInfo.innerHTML = '';
 }
 
 function foundOneCountry(countries) {
+  clearResult();
   const markupInfo = countries
     .map(({ name, capital, population, flags, languages }) => {
       return `
@@ -103,11 +89,14 @@ function foundOneCountry(countries) {
         </div>
         <p><b>Capitol</b>: ${capital}</p>
         <p><b>Population</b>: ${population}</p>
-        <p><b>Languages</b>: ${Object.values(languages)}</p>
+        <p><b>Languages</b>: ${Object.values(languages).map(l => ' ' + l)}</p>
       `;
     })
     .join('');
-
-  countryList.innerHTML = '';
   countryInfo.innerHTML = markupInfo;
+}
+
+function clearResult() {
+  countryList.innerHTML = '';
+  countryInfo.innerHTML = '';
 }
