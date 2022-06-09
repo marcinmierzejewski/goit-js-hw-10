@@ -24,8 +24,8 @@ body {
 }
 
 #search-box:hover,
-#search-boc:focus {
-  border: 1px solid #1111d4;
+#search-box:focus {
+  border-color: #1111d4;
 }
 
 ul,
