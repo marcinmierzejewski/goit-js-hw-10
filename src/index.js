@@ -19,7 +19,7 @@ const countryInfo = document.querySelector('.country-info');
 fetchCountryName.addEventListener(
   'input',
   _.debounce(e => {
-    fetchCountries(e.target.value.trim())
+    fetchCountries(e.target.value.trim()) //() => {fetchCountries(fetchCountryName.value.trim())...
       .then(countries => {
         console.log(countries);
         renderCountriesList(countries);
@@ -27,6 +27,7 @@ fetchCountryName.addEventListener(
       .then(console.log('Checking...'))
       .catch(error => {
         if (e.target.value.trim() !== '') {
+          // if (fetchCountryName.value.trim())
           noFoundMatch(error);
         } else {
           Notify.info('Enter country name');
